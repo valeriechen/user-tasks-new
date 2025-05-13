@@ -1,0 +1,20 @@
+## Problem Description
+`RepeatedKFold` and `RepeatedStratifiedKFold` do not show correct __repr__ string.
+
+## Expected Results
+```python
+>>> from sklearn.model_selection import RepeatedKFold, RepeatedStratifiedKFold
+>>> repr(RepeatedKFold())
+RepeatedKFold(n_splits=5, n_repeats=10, random_state=None)
+>>> repr(RepeatedStratifiedKFold())
+RepeatedStratifiedKFold(n_splits=5, n_repeats=10, random_state=None)
+```
+
+## Actual Results
+```python
+>>> from sklearn.model_selection import RepeatedKFold, RepeatedStratifiedKFold
+>>> repr(RepeatedKFold())
+'<sklearn.model_selection._split.RepeatedKFold object at 0x0000016421AA4288>'
+>>> repr(RepeatedStratifiedKFold())
+'<sklearn.model_selection._split.RepeatedStratifiedKFold object at 0x0000016420E115C8>'
+```
