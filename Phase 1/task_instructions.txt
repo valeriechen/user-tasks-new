@@ -1,20 +1,34 @@
 ## Problem Description
+# This issue affects the string representation of two cross-validation classes
 `RepeatedKFold` and `RepeatedStratifiedKFold` do not show correct __repr__ string.
 
 ## Expected Results
+# When we call repr() on these objects, they should show their parameters like other scikit-learn classes
 ```python
 >>> from sklearn.model_selection import RepeatedKFold, RepeatedStratifiedKFold
 >>> repr(RepeatedKFold())
-RepeatedKFold(n_splits=5, n_repeats=10, random_state=None)
+RepeatedKFold(n_splits=5, n_repeats=10, random_state=None)  # Shows class name and parameter values
 >>> repr(RepeatedStratifiedKFold())
-RepeatedStratifiedKFold(n_splits=5, n_repeats=10, random_state=None)
+RepeatedStratifiedKFold(n_splits=5, n_repeats=10, random_state=None)  # Shows class name and parameter values
 ```
 
 ## Actual Results
+# Currently, they just show the default Python object representation with memory address
 ```python
 >>> from sklearn.model_selection import RepeatedKFold, RepeatedStratifiedKFold
 >>> repr(RepeatedKFold())
-'<sklearn.model_selection._split.RepeatedKFold object at 0x0000016421AA4288>'
+'<sklearn.model_selection._split.RepeatedKFold object at 0x0000016421AA4288>'  # Unhelpful default representation
 >>> repr(RepeatedStratifiedKFold())
-'<sklearn.model_selection._split.RepeatedStratifiedKFold object at 0x0000016420E115C8>'
+'<sklearn.model_selection._split.RepeatedStratifiedKFold object at 0x0000016420E115C8>'  # Unhelpful default representation
 ```
+
+/*
+ * This is likely because the _RepeatedSplits base class (which both RepeatedKFold and 
+ * RepeatedStratifiedKFold inherit from) doesn't implement a __repr__ method.
+ * 
+ * Most other scikit-learn classes use the _build_repr() helper function to generate
+ * their string representations, which shows the class name and parameter values.
+ * 
+ * To fix this, we need to add a __repr__ method to the _RepeatedSplits class that
+ * calls _build_repr(self), similar to how other base classes do it.
+ */

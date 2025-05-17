@@ -1,24 +1,28 @@
 ## Issue description
+# The QDP parser in astropy is too strict about case sensitivity
 ascii.qdp assumes that commands in a QDP file are upper case, for example, for errors they must be "READ SERR 1 2" whereas QDP itself is not case sensitive and case use "read serr 1 2".
 
+# This is a usability issue that affects many users
 As many QDP files are created by hand, the expectation that all commands be all-caps should be removed.
 
 ## Expected behavior
+# The parser should accept lowercase commands just like the original QDP format does
 The following qdp file should read into a Table with errors, rather than crashing.
 
-read serr 1 2 
+read serr 1 2  # This lowercase command should be accepted
 1 0.5 1 0.5
 
 
 ## How to Reproduce
+# Here's a step-by-step reproduction of the issue
 
-Create a QDP file:
-
+# First, create a test QDP file with lowercase commands
 > cat > test.qdp
-read serr 1 2 
+read serr 1 2  # Note the lowercase "read serr" instead of "READ SERR"
 1 0.5 1 0.5
 <EOF>
 
+# Then try to read it with astropy
 > python
 Python 3.10.9 (main, Dec  7 2022, 02:03:23) [Clang 13.0.0 (clang-1300.0.29.30)] on darwin
 Type "help", "copyright", "credits" or "license" for more information.
@@ -30,4 +34,14 @@ WARNING: table_id not specified. Reading the first available table [astropy.io.a
 Traceback (most recent call last):
 ...
     raise ValueError(f'Unrecognized QDP line: {line}')
-ValueError: Unrecognized QDP line: read serr 1 2
+ValueError: Unrecognized QDP line: read serr 1 2  # The parser fails on lowercase commands
+
+/*
+ * The issue is in the regular expression pattern used to identify command lines.
+ * In astropy/io/ascii/qdp.py, the _command_re pattern is defined as:
+ *     _command_re = r"READ [TS]ERR(\s+[0-9]+)+"
+ * 
+ * This pattern requires "READ" to be uppercase, but should be case-insensitive.
+ * We need to modify this pattern to accept both uppercase and lowercase commands,
+ * either by using re.IGNORECASE flag or by modifying the pattern itself.
+ */
